@@ -516,7 +516,7 @@ window.buTick = () => {
   try { save(); ansSync(); } catch (e) {}
   const a = document.activeElement; if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName)) return;
   if ($('.sheet')) return;
-  if (['home','missions','remote','profile','hints','cal'].includes(cur().name)) render();
+  if (['home','missions','remote','profile','hints','cal','work'].includes(cur().name)) render();
 };
 function boot() {
   load();
