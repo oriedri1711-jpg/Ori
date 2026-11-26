@@ -48,7 +48,7 @@ const KEY = 'betweenUs.v1', PKEY = 'betweenUs.photos';
 const DEF = () => ({v:1, onboard:false,
   couple:{name:'', p:[{name:'',g:'m'},{name:'',g:'f'}], rel:'', since:'', created:Date.now()},
   set:{vibe:'mix', dur:30, touch:2, fav:[], hide:[], bounds:{kiss:1,photo:1,past:1,family:1,body:1,food:1,out:1,phone:1}, limits:['',''],
-       adult:{on:false, max:1, ok:[[0,0],[0,0]]}, reveal:'special', sound:true, haptic:true, ui:'dark', motion:true, hideAdult:false, pin:'', discreet:false, cloud:true, play:'one'},
+       adult:{on:false, max:1, ok:[[0,0],[0,0]]}, reveal:'special', sound:true, haptic:true, ui:'dark', motion:true, hideAdult:false, pin:'', discreet:false, cloud:true, play:'one', pushNote:true},
   prog:{pts:0, st:{cards:0,ans:0,tasks:0,comps:0,games:0,mins:0,dates:0,mems:0,mis:0,bull:0,match:0,surprise:0,myst:0,nophone:0,deep:0,remote:0,longest:0,modes:[]}, ach:{}, seen:{}, days:[], claimed:{}},
   fav:[], saved:[], notes:{}, react:{}, reported:{}, mem:[], misLog:[], journal:[], cur:null, daily:{}, ev:[], last:null, pet:null, room:null, roomAuth:false});
 let S;

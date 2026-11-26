@@ -24,7 +24,7 @@ async function gateSubmit() {
   if (pw.length < 4) return gateErr('הסיסמה צריכה לפחות 4 תווים');
   GATE.busy = true; GATE.err = ''; render();
   try {
-    const {nid, rid} = await roomIds(name, pw); const db = await dbReady();
+    const {nid, rid} = await roomIds(name, pw); const db = await dbReady(); GATE.relay = await relayIds(name, pw);
     if (GATE.tab === 'create') {
       if (db) {
         const taken = await withTimeout(db.doc('roomnames/' + nid).get());
@@ -56,7 +56,7 @@ const codeFrom = rid => Array.from({length: 6}, (_, i) => 'abcdefghjkmnpqrstuvwx
 function gateErr(m) { GATE.busy = false; GATE.err = m; render(); }
 function enterRoom(r) {
   GATE.busy = false; GATE.err = ''; GATE.pw = '';
-  S.room = {code: r.code, host: r.host, rname: r.rname, cloud: r.cloud}; S.roomAuth = true; save();
+  S.room = {code: r.code, host: r.host, rname: r.rname, cloud: r.cloud, relay: GATE.relay || null}; GATE.relay = null; S.roomAuth = true; save(); setTimeout(() => typeof relayPoll === 'function' && relayPoll(), 300);
   stack = [{name: 'home'}]; render(); confetti(); sfx('ach');
   toast(`<b>נכנסתם לחדר "${esc(r.rname)}"</b><br><span class="mut sm">${r.host ? 'יצרתם את החדר' : 'הצטרפתם לחדר'}. אותו שם וסיסמה יכניסו אתכם שוב.</span>`);
   if (R.room) joinRoom(r.code, r.host);

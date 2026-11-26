@@ -72,7 +72,7 @@ function ansSync() {
     if (!R.room || !S.room || myIdx() === null) return; const me = myIdx(); const cut = Date.now() - 3 * 864e5;
     const dans = Object.entries(ansAll()).filter(([, e]) => e.kind !== 'game' && e.t[me] && e.at[me] > cut).sort((a, b) => b[1].at[me] - a[1].at[me]).slice(0, 6)
       .map(([k, e]) => ({k, t: e.t[me].slice(0, 200), at: e.at[me], pts: e.pts, kind: e.kind}));
-    R.room.presence({app: 'bu', code: S.room.code, role: S.room.host ? 'host' : 'guest', dans}).catch(() => {});
+    R.room.presence({app: 'bu', code: S.room.code, role: S.room.host ? 'host' : 'guest', dans, ...(typeof loveFields === 'function' ? loveFields() : {})}).catch(() => {});
   }, 400);
 }
 function ansMerge(list, pi) {
@@ -88,5 +88,5 @@ function ansMerge(list, pi) {
 function ansLobby(ch) {
   if (!S.room) return; const want = S.room.host ? 'guest' : 'host';
   const p = ch.peers.find(x => !x.isMe && x.presence && x.presence.app === 'bu' && x.presence.code === S.room.code && x.presence.role === want);
-  if (p) ansMerge(p.presence.dans, S.room.host ? 1 : 0);
+  if (p) { ansMerge(p.presence.dans, S.room.host ? 1 : 0); if (typeof loveLobby === 'function') loveLobby(p.presence); }
 }

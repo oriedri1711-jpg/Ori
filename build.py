@@ -6,7 +6,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, 'src') if os.path.isdir(os.path.join(HERE, 'src')) else os.path.join(HERE, '..', 'between-us')
 NM = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'node_modules')
 WWW = os.path.join(HERE, 'www')
-JS = ['cards.js', 'core.js', 'screens.js', 'pet.js', 'answers.js', 'gate.js', 'gen.js', 'game.js']
+JS = ['cards.js', 'core.js', 'screens.js', 'pet.js', 'answers.js', 'gate.js', 'gen.js', 'love.js', 'game.js']
 
 os.makedirs(os.path.join(WWW, 'fonts'), exist_ok=True)
 for f in JS + ['p2p.js']:
