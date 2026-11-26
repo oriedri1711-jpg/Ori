@@ -33,6 +33,9 @@ jobs:
       - name: Create Android project
         run: |
           npx cap add android
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-feature android:name="android.hardware.location.gps" android:required="false" />\n</manifest>#' $M
+          grep -n "permission" $M
           npx cap sync android
       - name: Use the fixed signing key (so updates install over the old version)
         run: |

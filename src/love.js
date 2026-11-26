@@ -54,7 +54,7 @@ async function relayPoll() {
     for (const l of lines) {
       let m; try { m = JSON.parse(l); } catch (e) { continue; } if (!m || m.event !== 'message') continue; lastId = m.id;
       let d; try { d = await unseal(m.message); } catch (e) { continue; } if (!d || d.dev === devId()) continue;
-      if (d.type === 'hint') loveMerge({lh: [d.data]}, true); else if (d.type === 'cal') loveMerge({lc: [d.data]}, true); else if (d.type === 'read') loveMerge({hr: d.data}, true); else if (d.type === 'work' && typeof workMerge === 'function') workMerge([d.data]); else if (d.type === 'wcfg' && d.data && typeof workMerge === 'function') workMerge(null, {[d.data.who === 0 ? 0 : 1]: d.data.c});
+      if (d.type === 'hint') loveMerge({lh: [d.data]}, true); else if (d.type === 'cal') loveMerge({lc: [d.data]}, true); else if (d.type === 'read') loveMerge({hr: d.data}, true); else if (d.type === 'place' && typeof placeMerge === 'function') placeMerge([d.data]); else if (d.type === 'work' && typeof workMerge === 'function') workMerge([d.data]); else if (d.type === 'wcfg' && d.data && typeof workMerge === 'function') workMerge(null, {[d.data.who === 0 ? 0 : 1]: d.data.c});
     }
     if (lastId) { S.relaySince = S.relaySince || {}; S.relaySince[S.room.relay.topic] = lastId; save(); }
   } catch (e) { LV.ok = false; }
@@ -67,7 +67,7 @@ function loveFields() {
   const lh = hintsAll().filter(h => h.from === me).slice(-lim[0]).map(h => ({id: h.id, k: h.k, e: h.e, t: h.t, ts: h.ts, from: h.from}));
   const lc = Object.values(calAll()).filter(e => e.ed === me).sort((a, b) => b.ts - a.ts).slice(0, lim[1]);
   const hr = hintsAll().filter(h => h.from !== me && h.read).reduce((m, h) => Math.max(m, h.ts), 0);
-  return {lh, lc, hr, ...(typeof workFields === 'function' ? workFields() : {})};
+  return {lh, lc, hr, ...(typeof workFields === 'function' ? workFields() : {}), ...(typeof placeFields === 'function' ? placeFields() : {})};
 }
 function loveMerge(p, viaRelay) {
   if (!p) return; const me = meSlot(); let nh = [], nc = 0;
@@ -90,7 +90,7 @@ function loveMerge(p, viaRelay) {
   if (nc >= 1 && !nh.length && cur().name !== 'cal') toast(`${ic('cal')} ${esc(nm(1 - me))} ${gw(1 - me, 'עדכן', 'עדכנה')} את הלוז המשותף`, 'info');
   if (['home', 'hints', 'cal'].includes(cur().name) && !$('.sheet') && !(document.activeElement && /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName))) render();
 }
-function loveLobby(presence) { loveMerge({lh: presence.lh, lc: presence.lc, hr: presence.hr}); if (typeof workMerge === 'function') workMerge(presence.lw, presence.wc); }
+function loveLobby(presence) { loveMerge({lh: presence.lh, lc: presence.lc, hr: presence.hr}); if (typeof workMerge === 'function') workMerge(presence.lw, presence.wc); if (typeof placeMerge === 'function') placeMerge(presence.lp); }
 
 /* ── hints ── */
 function sendHint(k, custom) {
