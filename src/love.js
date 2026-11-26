@@ -54,7 +54,7 @@ async function relayPoll() {
     for (const l of lines) {
       let m; try { m = JSON.parse(l); } catch (e) { continue; } if (!m || m.event !== 'message') continue; lastId = m.id;
       let d; try { d = await unseal(m.message); } catch (e) { continue; } if (!d || d.dev === devId()) continue;
-      if (d.type === 'hint') loveMerge({lh: [d.data]}, true); else if (d.type === 'cal') loveMerge({lc: [d.data]}, true); else if (d.type === 'read') loveMerge({hr: d.data}, true); else if (d.type === 'place' && typeof placeMerge === 'function') placeMerge([d.data]); else if (d.type === 'work' && typeof workMerge === 'function') workMerge([d.data]); else if (d.type === 'wcfg' && d.data && typeof workMerge === 'function') workMerge(null, {[d.data.who === 0 ? 0 : 1]: d.data.c});
+      if (d.type === 'hint') loveMerge({lh: [d.data]}, true); else if (d.type === 'cal') loveMerge({lc: [d.data]}, true); else if (d.type === 'read') loveMerge({hr: d.data}, true); else if (d.type === 'place' && typeof placeMerge === 'function') placeMerge([d.data]); else if (d.type === 'work' && typeof workMerge === 'function') workMerge([d.data]); else if (d.type === 'wcfg' && d.data && typeof workMerge === 'function') workMerge(null, {[d.data.who === 0 ? 0 : 1]: d.data.c}); else if (d.type === 'arc' && typeof arcMerge === 'function') arcMerge(d.data);
     }
     if (lastId) { S.relaySince = S.relaySince || {}; S.relaySince[S.room.relay.topic] = lastId; save(); }
   } catch (e) { LV.ok = false; }

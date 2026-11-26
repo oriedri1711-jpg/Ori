@@ -178,6 +178,25 @@ label.f{display:block;font-size:14px;color:var(--mut);margin:14px 0 6px}
 .consent{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .consent button{min-height:58px;border-radius:18px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-weight:600}
 .consent button.on{background:#fff;color:#7a0f2e}
+.petw{position:relative;display:inline-block;line-height:1}.petw .acc{position:absolute;left:50%;transform:translateX(-50%);line-height:1;pointer-events:none;font-size:.46em}
+.acc-head{top:-.3em}.acc-eyes{top:.28em;font-size:.36em!important}.acc-neck{bottom:-.2em;font-size:.4em!important}.acc-side{top:0;left:92%!important;font-size:.32em!important}.acc-baby{left:auto!important;right:-.12em;transform:none!important;bottom:0;font-size:.3em!important}
+.pill.coin{background:linear-gradient(135deg,#ffd34d,#ff9a1f);color:#5a3200;font-weight:700;border:0}
+.lb{display:flex;flex-direction:column;gap:6px}.lbr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:var(--sur2)}.lbr.lead{background:linear-gradient(135deg,rgba(255,211,77,.28),rgba(255,92,138,.22))}.lbm{width:26px;text-align:center;font-weight:700}.lbs{font-size:20px}
+.gcard{display:flex;align-items:center;gap:12px;width:100%}.gcard .ge{font-size:38px;width:56px;height:56px;display:grid;place-items:center;border-radius:16px;background:var(--sur2)}.gplay{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--rose),var(--wine));color:#fff}
+.tile.prize{background:linear-gradient(135deg,rgba(255,211,77,.22),rgba(180,107,255,.2))}
+.shopg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.shopi{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 10px;border-radius:18px;background:var(--sur);border:1.5px solid var(--line,rgba(127,127,127,.2));color:inherit;font:inherit;text-align:center;cursor:pointer}
+.shopi .se{font-size:40px;line-height:1.1}.shopi.on{border-color:var(--rose);box-shadow:0 0 0 3px rgba(255,92,138,.18)}.shopi.lock{opacity:.55}.shopi .pr{font-weight:700;color:#d98a00}.shopi .pr.no{opacity:.55}
+body.gaming{overflow:hidden}body.gaming .fabt{display:none}
+#arcade{position:fixed;inset:0;z-index:9999;background:#120a1c;display:flex;flex-direction:column;color:#fff;touch-action:none;user-select:none;-webkit-user-select:none;padding-top:var(--safe-t,env(safe-area-inset-top));padding-bottom:var(--safe-b,env(safe-area-inset-bottom))}
+#arcade .gtop{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;gap:8px}.gx{width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:18px;font-weight:700}
+.ghud{display:flex;align-items:center;gap:14px;font-size:16px}.ghud b{font-size:28px;min-width:40px;text-align:center}
+.gcvw{position:relative;flex:1;min-height:0;max-width:520px;width:100%;margin:0 auto}.gcvw canvas{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:16px}
+.gmsg{position:absolute;inset:0;display:none;place-items:center;background:rgba(10,4,20,.55);border-radius:16px;padding:18px}.gmsg.on{display:grid}
+.gbox{background:rgba(30,16,48,.92);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:22px;text-align:center;width:min(320px,100%)}.gbox h2{color:#fff}
+.gbig{font-size:64px;font-weight:800;line-height:1.1}.gtag{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:99px;background:linear-gradient(135deg,#ffd34d,#ff8a1f);color:#4a2600;font-weight:700;font-size:14px}
+.gvs{display:flex;align-items:center;justify-content:center;gap:12px}.gvs span{display:flex;flex-direction:column;font-size:13px;opacity:.9}.gvs b{font-size:22px}.gvs i{opacity:.6;font-style:normal;font-size:12px}
+.gpad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px 14px;max-width:520px;width:100%;margin:0 auto}.gpad button{height:58px;border-radius:16px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px}.gpad .gup{background:linear-gradient(135deg,var(--rose,#ff5c8a),var(--wine,#a0124a))}
+.ghint{text-align:center;padding:12px;font-size:13px;opacity:.8}
 .fabt{position:fixed;z-index:35;left:max(14px,calc(50% - 226px));bottom:calc(86px + var(--safe-b));min-width:52px;height:52px;padding:0 14px;border-radius:99px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--sur2);color:var(--ink);border:1px solid var(--line);box-shadow:0 10px 26px rgba(0,0,0,.45);font-weight:600;font-variant-numeric:tabular-nums}
 .fabt svg{width:24px;height:24px}.fabt.on{background:linear-gradient(135deg,var(--rose),var(--wine));color:#fff;border:0}.fabt.lift{bottom:calc(84px + var(--safe-b))}.fabt span{direction:ltr}#app .scr{padding-bottom:calc(160px + var(--safe-b))}
 .stop{position:fixed;z-index:40;left:18px;bottom:calc(18px + var(--safe-b));min-height:48px;padding:0 18px;border-radius:99px;background:#fff;color:#7a0f2e;font-weight:700;box-shadow:0 10px 26px rgba(0,0,0,.4);display:flex;align-items:center;gap:6px}
@@ -274,6 +293,7 @@ table.inf td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align
 <script src="love.js"></script>
 <script src="pay.js"></script>
 <script src="places.js"></script>
+<script src="arcade.js"></script>
 <script src="timer.js"></script>
 <script src="game.js"></script>
 </body>

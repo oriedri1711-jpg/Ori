@@ -45,7 +45,9 @@ const SPECIES = [
 ];
 const SP = Object.fromEntries(SPECIES.map(s => [s[0], {id:s[0], r:s[1], e:s[2], n:s[3], d:s[4]}]));
 const EGG_NEED = 12;
-const STAGES = [[0,'תינוק'],[15,'צעיר'],[40,'בוגר'],[80,'אגדה מטופחת']];
+const STAGES = [[0,'תינוק'],[20,'ילד'],[60,'נער']];
+const STAGE_E = ['🍼','🎒','🛹'];
+const pSpr = (p, sz, cls) => typeof petSprite === 'function' ? petSprite(p, sz, cls) : sprite(p.sp, sz, cls);
 const MAX_PETS = 8;
 const newEgg = () => ({egg:0, need:EGG_NEED, laid:Date.now()});
 function petState() {
@@ -69,7 +71,7 @@ const eggReady = () => { const e = petState().egg; return e && e.egg >= e.need; 
 function petFeed(n, silent) {
   const P = petState();
   if (P.egg) { const was = P.egg.egg; P.egg.egg = Math.max(0, Math.min(P.egg.need, P.egg.egg + n)); if (P.egg.egg >= P.egg.need && was < P.egg.need && !silent) setTimeout(() => toast('<b>הביצה מוכנה לבקוע!</b><br><span class="mut sm">היכנסו לחיות שלכם כדי לגלות מי מחכה בפנים</span>', 'ach', 'spark'), 600); }
-  P.pets.forEach(p => { const before = petStage(p); p.care = Math.max(0, p.care + n); const after = petStage(p); if (after > before && !silent) setTimeout(() => { toast(`<b>${esc(p.name || SP[p.sp].n)} גדל!</b><br><span class="mut sm">שלב חדש: ${STAGES[after][1]}</span>`, 'ach', 'heart'); confetti(); }, 700); });
+  P.pets.forEach(p => { const before = petStage(p); p.care = Math.max(0, p.care + n); const after = petStage(p); if (after > before && !silent) setTimeout(() => { toast(`<b>${esc(p.name || SP[p.sp].n)} גדל!</b><br><span class="mut sm">שלב חדש: ${STAGE_E[after]} ${STAGES[after][1]}</span>`, 'ach', 'heart'); confetti(); }, 700); });
   save();
 }
 function hatch() {
@@ -92,7 +94,7 @@ function petMini() {
   const P = petState(); const sel = P.active === 'egg' ? null : P.pets.find(p => p.id === P.active);
   const extra = P.pets.length + (P.egg ? 1 : 0) > 1 ? `<div class="xs mut" style="text-align:center">${P.pets.length} חיות${P.egg ? ' + ביצה' : ''}</div>` : '';
   if (!sel) { const e = P.egg; return `<div style="display:flex;justify-content:center">${eggSvg(54, e.egg / e.need)}</div><div class="bar mt" style="height:7px"><i style="width:${e.egg / e.need * 100}%"></i></div><div class="xs mut mt">${e.egg >= e.need ? 'מוכנה לבקוע!' : `ביצה · ${e.egg}/${e.need}`}</div>${extra}`; }
-  const s = SP[sel.sp]; return `<div style="text-align:center">${sprite(sel.sp, 50, 'bob')}</div><div class="xs mt" style="text-align:center"><b>${esc(sel.name || s.n)}</b></div><div style="text-align:center"><span class="rar r-${s.r}">${RAR[s.r].n}</span></div>${extra}`;
+  const s = SP[sel.sp]; return `<div style="text-align:center">${pSpr(sel, 50, 'bob')}</div><div class="xs mt" style="text-align:center"><b>${esc(sel.name || s.n)}</b></div><div style="text-align:center"><span class="rar r-${s.r}">${RAR[s.r].n}</span></div>${extra}`;
 }
 
 SCREENS.pet = () => {
@@ -105,11 +107,11 @@ SCREENS.pet = () => {
       <p style="position:relative;opacity:.9;margin-top:4px">${ready ? 'מי מחכה בפנים? אולי מישהו נדיר במיוחד.' : `עוד ${e.need - e.egg} נקודות טיפוח עד שהיא בוקעת`}</p>
       <div class="bar mt" style="background:rgba(255,255,255,.2);position:relative"><i style="width:${e.egg / e.need * 100}%;background:#fff"></i></div></div>`;
   } else {
-    const s = SP[sel.sp], st = petStage(sel), nx = STAGES[st + 1], bg = RAR[s.r].c;
+    const s = SP[sel.sp], st = petStage(sel), nx = STAGES[st + 1], bg = (typeof petBg === 'function' && petBg(sel)) || RAR[s.r].c;
     hero = `<div class="hab" style="--h1:${bg[0]};--h2:${bg[1]}"><div class="stars"></div><span class="rar r-${s.r}" style="position:relative">${RAR[s.r].n} · ${RAR[s.r].he}</span>
-      <button class="petbtn" data-act="petpat" aria-label="ללטף">${sprite(sel.sp, 92 + st * 18, 'bob')}</button>
+      <button class="petbtn" data-act="petpat" aria-label="ללטף">${pSpr(sel, 92 + st * 24, 'bob')}</button>
       <div class="row" style="justify-content:center;position:relative"><div class="disp" style="font-size:26px">${esc(sel.name || s.n)}</div><button class="ib" style="width:36px;height:36px;background:rgba(255,255,255,.18);border:0;color:#fff" data-act="petname" aria-label="שינוי שם">${ic('note')}</button></div>
-      <p style="position:relative;opacity:.92">${s.n} · ${STAGES[st][1]}</p><p class="sm" style="position:relative;opacity:.85;margin-top:4px">${s.d}</p>
+      <p style="position:relative;opacity:.92">${s.n} · ${STAGE_E[st]} ${STAGES[st][1]}</p><p class="sm" style="position:relative;opacity:.85;margin-top:4px">${s.d}</p>
       ${nx ? `<div class="bar mt" style="background:rgba(255,255,255,.2);position:relative"><i style="width:${(sel.care - STAGES[st][0]) / (nx[0] - STAGES[st][0]) * 100}%;background:#fff"></i></div><div class="xs mt" style="position:relative;opacity:.9">עוד ${nx[0] - sel.care} לשלב "${nx[1]}"</div>` : `<div class="xs mt" style="position:relative">הגיע לשיא הגדילה!</div>`}</div>`;
   }
   const team = `<div class="chips mt">${P.pets.map(p => `<button class="chip ${P.active === p.id ? 'on' : ''}" data-act="petsel" data-id="${p.id}"><span style="font-size:18px">${SP[p.sp].e}</span>${esc(p.name || SP[p.sp].n)}</button>`).join('')}${P.egg ? `<button class="chip ${P.active === 'egg' ? 'on' : ''}" data-act="petsel" data-id="egg">${eggReady() ? ic('spark') : ''}ביצה ${P.egg.egg}/${P.egg.need}</button>` : ''}</div>`;
@@ -118,10 +120,11 @@ SCREENS.pet = () => {
     : `<button class="btn wide gold mt" data-act="newegg">${ic('gift')}לקבל את הביצה הבאה</button>`;
   const owned = RAR_ORDER.map(r => `<div class="sec"><h3 style="display:flex;gap:8px;align-items:center"><span class="rar r-${r}">${RAR[r].n}</span><span class="sm mut">${RAR[r].he} · ${RAR[r].w}%</span></h3></div><div class="ach" style="grid-template-columns:repeat(4,minmax(0,1fr))">${SPECIES.filter(x => x[1] === r).map(x => { const have = P.dex[x[0]]; return `<div><span class="badge ${have ? '' : 'off'}" style="${have ? `background:linear-gradient(145deg,${RAR[r].c[0]},${RAR[r].c[1]})` : ''};font-size:${x[2].length > 2 ? 22 : 32}px">${have ? x[2] : '?'}</span><span class="xs">${have ? x[3] : '???'}</span></div>`; }).join('')}</div>`).join('');
   return `<div class="scr">${topbar('החיות שלנו')}
-  ${hero}${team}${nextEgg}
+  ${hero}${sel && typeof petLinks === 'function' ? petLinks() : ''}${team}${nextEgg}
   ${sel && P.pets.length > 1 ? `<button class="btn ghost wide" data-act="petfree">שחרור ${esc(sel.name || SP[sel.sp].n)} לאוסף</button>` : ''}
   <div class="tile mt"><b>איך מגדלים?</b><div class="col sm mut mt" style="gap:6px">
-   <div>${ic('target')} משימה זוגית ששניכם עניתם עליה: +2</div><div>${ic('check')} משימה במשחק: +1</div><div>${ic('star')} קלף היום ששניכם עניתם עליו: +1 · זיכרון חדש: +1</div><div>${ic('fire')} כל אבן דרך ברצף: +2</div></div>
+   <div>${ic('target')} משימה זוגית ששניכם עניתם עליה: +2</div><div>${ic('check')} משימה במשחק: +1</div><div>${ic('star')} קלף היום ששניכם עניתם עליו: +1 · זיכרון חדש: +1</div><div>${ic('fire')} כל אבן דרך ברצף: +2</div><div>🛍️ אוכל מהחנות: עד +25</div></div>
+   <p class="sm mt">שלושה שלבי גדילה: ${STAGES.map((x, i) => `${STAGE_E[i]} ${x[1]}${i ? ` (${x[0]})` : ''}`).join(' ← ')}</p>
    <p class="xs mut mt">כל נקודה מחממת את הביצה, וגם עוזרת לכל החיות שכבר בקעו לגדול. אפשר לגדל כמה חיות במקביל.</p>
    <p class="xs dim mt">החיות לא נפגעות ולא נעלמות אם לא נכנסים. הן פשוט מחכות לכם.</p>
    <button class="btn sm mt" data-go="missions">למשימות של היום</button></div>
