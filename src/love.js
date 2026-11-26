@@ -79,7 +79,7 @@ function loveMerge(p, viaRelay) {
   if (Array.isArray(p.lc)) p.lc.forEach(e => {
     if (!e || typeof e.id !== 'string' || typeof e.title !== 'string') return; const cur0 = calAll()[e.id];
     if (cur0 && cur0.ts >= (+e.ts || 0)) return;
-    calAll()[e.id] = {id: e.id.slice(0, 40), title: e.title.slice(0, 80), date: String(e.date || '').slice(0, 10), time: String(e.time || '').slice(0, 5), end: String(e.end || '').slice(0, 5), who: e.who === 0 || e.who === 1 ? e.who : 'b', note: String(e.note || '').slice(0, 300), ts: +e.ts || Date.now(), ed: e.ed === 0 ? 0 : 1, by: e.by === 0 ? 0 : 1, del: !!e.del};
+    calAll()[e.id] = {id: e.id.slice(0, 40), title: e.title.slice(0, 80), date: String(e.date || '').slice(0, 10), time: String(e.time || '').slice(0, 5), end: String(e.end || '').slice(0, 5), who: e.who === 0 || e.who === 1 ? e.who : 'b', note: String(e.note || '').slice(0, 300), ts: +e.ts || Date.now(), ed: e.ed === 0 ? 0 : 1, by: e.by === 0 ? 0 : 1, del: !!e.del, rep: Array.isArray(e.rep) ? [...new Set(e.rep.map(Number).filter(x => x >= 0 && x <= 6))] : [], until: /^\d{4}-\d{2}-\d{2}$/.test(e.until || '') ? e.until : '', skip: Array.isArray(e.skip) ? e.skip.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).slice(-120) : []};
     nc++;
   });
   if (+p.hr) { const was = S.hintRead || 0; S.hintRead = Math.max(was, +p.hr); if (S.hintRead !== was) nc = nc || 0.5; }
@@ -141,23 +141,30 @@ const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')
 const WHO_C = w => (w === 'b' ? 'var(--gold)' : w === meSlot() ? 'var(--rose)' : '#7b8cff');
 const whoLbl = w => (w === 'b' ? 'משותף' : w === meSlot() ? 'שלי' : 'של ' + nm(w));
 const calList = () => Object.values(calAll()).filter(e => !e.del);
+const dowOf = d => new Date(d + 'T12:00').getDay();
+const isRep = e => Array.isArray(e.rep) && e.rep.length > 0;
+function occOn(e, d) { if (e.del) return false; if (!isRep(e)) return e.date === d; return d >= e.date && (!e.until || d <= e.until) && e.rep.includes(dowOf(d)) && !(e.skip || []).includes(d); }
+function occRange(from, days, filt = () => true) { const out = []; const L = calList().filter(filt); const d0 = new Date(from + 'T12:00'); for (let i = 0; i < days; i++) { const d = new Date(d0); d.setDate(d0.getDate() + i); const k = ymd(d); L.forEach(e => { if (occOn(e, k)) out.push({e, d: k}); }); } return out; }
+const DAY_N = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+function repLbl(e) { if (!isRep(e)) return ''; const r = [...e.rep].sort(); const s = r.join(''); const t = s === '0123456' ? 'כל יום' : s === '01234' ? 'א׳–ה׳' : s === '012345' ? 'א׳–ו׳' : r.map(i => HEB_D[i]).join(' '); return `🔁 ${t}${e.until ? ' עד ' + new Date(e.until + 'T12:00').toLocaleDateString('he-IL', {day: 'numeric', month: 'numeric'}) : ''}`; }
 const evSort = (a, b) => (a.date + (a.time || '99')).localeCompare(b.date + (b.time || '99'));
-function upcoming(n = 3) { const t = ymd(new Date()); return calList().filter(e => e.date >= t).sort(evSort).slice(0, n); }
+function upcoming(n = 3) { return occRange(ymd(new Date()), 45).sort((a, b) => evSort({...a.e, date: a.d}, {...b.e, date: b.d})).slice(0, n).map(o => ({...o.e, date: o.d})); }
 const CALV = {mo: 0, sel: null, f: 'all'};
 const HEB_D = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
-function evRow(e) {
-  const d = new Date(e.date + 'T12:00');
-  return `<button class="tile tap row" style="width:100%;text-align:start;border-inline-start:4px solid ${WHO_C(e.who)}" data-act="calopen" data-id="${esc(e.id)}"><div style="min-width:54px;text-align:center"><div class="xs mut">${d.toLocaleDateString('he-IL', {weekday: 'short'})}</div><div class="disp" style="font-size:20px">${d.getDate()}</div><div class="xs mut">${d.toLocaleDateString('he-IL', {month: 'short'})}</div></div><div class="sp"><b>${esc(e.title)}</b><div class="xs mut">${e.time ? esc(e.time) + (e.end ? '–' + esc(e.end) : '') + ' · ' : 'כל היום · '}<span style="color:${WHO_C(e.who)}">${esc(whoLbl(e.who))}</span></div>${e.note ? `<div class="xs mut" style="margin-top:2px">${esc(e.note.slice(0, 80))}</div>` : ''}</div></button>`;
+function evRow(o) {
+  const e = o.e || o, od = o.d || e.date; const d = new Date(od + 'T12:00');
+  return `<button class="tile tap row" style="width:100%;text-align:start;border-inline-start:4px solid ${WHO_C(e.who)}" data-act="calopen" data-id="${esc(e.id)}" data-d="${od}"><div style="min-width:54px;text-align:center"><div class="xs mut">${d.toLocaleDateString('he-IL', {weekday: 'short'})}</div><div class="disp" style="font-size:20px">${d.getDate()}</div><div class="xs mut">${d.toLocaleDateString('he-IL', {month: 'short'})}</div></div><div class="sp"><b>${esc(e.title)}</b><div class="xs mut">${e.time ? esc(e.time) + (e.end ? '–' + esc(e.end) : '') + ' · ' : 'כל היום · '}<span style="color:${WHO_C(e.who)}">${esc(whoLbl(e.who))}</span>${isRep(e) ? ' · ' + repLbl(e) : ''}</div>${e.note ? `<div class="xs mut" style="margin-top:2px">${esc(e.note.slice(0, 80))}</div>` : ''}</div></button>`;
 }
 SCREENS.cal = () => {
   const base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + CALV.mo);
   const y = base.getFullYear(), m = base.getMonth(); const first = new Date(y, m, 1).getDay(); const days = new Date(y, m + 1, 0).getDate(); const today = ymd(new Date());
   const filt = e => CALV.f === 'all' || (CALV.f === 'me' ? e.who === meSlot() : CALV.f === 'p' ? e.who === 1 - meSlot() : e.who === 'b');
-  const byDay = {}; calList().filter(filt).forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+  const byDay = {}; occRange(`${y}-${String(m + 1).padStart(2, '0')}-01`, days, filt).forEach(o => { (byDay[o.d] = byDay[o.d] || []).push(o); });
   const cells = []; for (let i = 0; i < first; i++) cells.push('<div></div>');
   for (let d = 1; d <= days; d++) { const k = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; const ev = byDay[k] || [];
-    cells.push(`<button data-act="calday" data-d="${k}" style="aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;${k === CALV.sel ? 'background:var(--rose);color:#fff' : k === today ? 'background:var(--sur2);outline:1.5px solid var(--rose)' : ''}" aria-label="${d}${ev.length ? ', ' + ev.length + ' אירועים' : ''}"><span style="font-weight:${k === today ? 700 : 400}">${d}</span><span style="display:flex;gap:2px;height:6px">${ev.slice(0, 3).map(e => `<i style="width:6px;height:6px;border-radius:50%;background:${k === CALV.sel ? '#fff' : WHO_C(e.who)}"></i>`).join('')}</span></button>`); }
-  const list = CALV.sel ? (byDay[CALV.sel] || []).sort(evSort) : calList().filter(filt).filter(e => e.date >= today).sort(evSort).slice(0, 30);
+    cells.push(`<button data-act="calday" data-d="${k}" style="aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;${k === CALV.sel ? 'background:var(--rose);color:#fff' : k === today ? 'background:var(--sur2);outline:1.5px solid var(--rose)' : ''}" aria-label="${d}${ev.length ? ', ' + ev.length + ' אירועים' : ''}"><span style="font-weight:${k === today ? 700 : 400}">${d}</span><span style="display:flex;gap:2px;height:6px">${ev.slice(0, 3).map(o => `<i style="width:6px;height:6px;border-radius:50%;background:${k === CALV.sel ? '#fff' : WHO_C(o.e.who)}"></i>`).join('')}</span></button>`); }
+  const oSort = (a, b) => evSort({...a.e, date: a.d}, {...b.e, date: b.d});
+  const list = CALV.sel ? (byDay[CALV.sel] || occRange(CALV.sel, 1, filt)).sort(oSort) : occRange(today, 60, filt).sort(oSort).slice(0, 30);
   return `<div class="scr">${topbar('הלוז שלנו', `<button class="ib" data-act="caladd" aria-label="אירוע חדש">${ic('plus')}</button>`)}
   <div class="chips mb">${[['all', 'הכל'], ['me', 'שלי'], ['p', 'של ' + esc(nm(1 - meSlot()))], ['b', 'משותף']].map(([k, l]) => `<button class="chip ${CALV.f === k ? 'on' : ''}" data-act="calf" data-f="${k}">${k !== 'all' ? `<i style="width:10px;height:10px;border-radius:50%;background:${WHO_C(k === 'me' ? meSlot() : k === 'p' ? 1 - meSlot() : 'b')}"></i>` : ''}${l}</button>`).join('')}</div>
   <div class="tile"><div class="row" style="margin-bottom:8px"><button class="ib" data-act="calmo" data-d="-1" aria-label="חודש קודם">${ic('fwd')}</button><b class="sp" style="text-align:center">${base.toLocaleDateString('he-IL', {month: 'long', year: 'numeric'})}</b><button class="ib" data-act="calmo" data-d="1" aria-label="חודש הבא">${ic('back')}</button></div>
@@ -172,26 +179,38 @@ ACT.calmo = a => { CALV.mo += +a.dataset.d; CALV.sel = null; render(); };
 ACT.calday = a => { CALV.sel = a.dataset.d || null; render(); };
 ACT.calf = a => { CALV.f = a.dataset.f; render(); };
 ACT.caladd = () => calSheet(null);
-ACT.calopen = a => calSheet(a.dataset.id);
-function calSheet(id) {
-  const e = id ? calAll()[id] : {title: '', date: CALV.sel || ymd(new Date()), time: '', end: '', who: meSlot(), note: ''};
-  let who = e.who;
+ACT.calopen = a => calSheet(a.dataset.id, a.dataset.d);
+function calSheet(id, occ) {
+  const e = id ? calAll()[id] : {title: '', date: CALV.sel || ymd(new Date()), time: '', end: '', who: meSlot(), note: '', rep: [], until: ''};
+  let who = e.who; let reps = new Set(e.rep || []);
   const draw = b => {
     b.innerHTML = `<div class="grab"></div><h3>${id ? 'עריכת אירוע' : 'אירוע חדש'}</h3>
     <label class="f" for="ct">מה?</label><input id="ct" class="inp" maxlength="80" value="${esc(e.title)}" placeholder="למשל: ארוחת ערב אצל ההורים">
     <label class="f">של מי?</label><div class="seg" id="cw">${[[meSlot(), 'שלי'], [1 - meSlot(), 'של ' + esc(nm(1 - meSlot()))], ['b', 'משותף']].map(([v, l]) => `<button class="${who === v ? 'on' : ''}" data-w="${v}">${l}</button>`).join('')}</div>
     <div class="grid2"><div><label class="f" for="cd">תאריך</label><input id="cd" class="inp" type="date" value="${esc(e.date)}"></div><div><label class="f" for="cs">שעה (לא חובה)</label><input id="cs" class="inp" type="time" value="${esc(e.time)}"></div></div>
     <label class="f" for="ce">עד שעה (לא חובה)</label><input id="ce" class="inp" type="time" value="${esc(e.end || '')}">
+    <label class="f">חוזר כל שבוע</label>
+    <div id="cr" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">${HEB_D.map((d, i) => `<button class="chip ${reps.has(i) ? 'on' : ''}" data-r="${i}" style="justify-content:center;padding:0" aria-label="${DAY_N[i]}" aria-pressed="${reps.has(i)}">${d}</button>`).join('')}</div>
+    <div class="row wrap mt" id="crp" style="gap:6px">${[['01234', 'א׳–ה׳'], ['012345', 'א׳–ו׳'], ['0123456', 'כל יום'], ['', 'בלי חזרה']].map(([v, l]) => `<button class="chip" data-rp="${v}">${l}</button>`).join('')}</div>
+    <div id="cuw" style="${reps.size ? '' : 'display:none'}"><label class="f" for="cu">עד תאריך (לא חובה)</label><input id="cu" class="inp" type="date" value="${esc(e.until || '')}"><p class="xs mut" style="margin-top:4px">בלי תאריך, זה חוזר כל שבוע עד שמוחקים.</p></div>
     <label class="f" for="cn">הערה</label><textarea id="cn" class="inp" maxlength="300" rows="2" placeholder="כתובת, מה להביא...">${esc(e.note || '')}</textarea>
     ${id ? `<p class="xs mut mt">${e.by === e.ed ? 'נוסף' : 'עודכן'} ע״י ${esc(nm(e.ed))} · ${timeAgo(e.ts)}</p>` : ''}
     <button class="btn wide mt" id="csv">${ic('check')}שמירה</button>${id ? `<button class="btn ghost wide mt" id="cdel" style="color:#ff7b8f">${ic('trash')}מחיקה</button>` : ''}<button class="btn soft wide mt" data-close>ביטול</button>`;
     $('#cw', b).onclick = ev => { const t = ev.target.closest('[data-w]'); if (!t) return; who = t.dataset.w === 'b' ? 'b' : +t.dataset.w; $$('#cw button', b).forEach(x => x.classList.toggle('on', x === t)); };
+    const syncR = () => { $$('#cr [data-r]', b).forEach(x => { const on = reps.has(+x.dataset.r); x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); }); $('#cuw', b).style.display = reps.size ? '' : 'none'; };
+    $('#cr', b).onclick = ev => { const t = ev.target.closest('[data-r]'); if (!t) return; const i = +t.dataset.r; reps.has(i) ? reps.delete(i) : reps.add(i); syncR(); };
+    $('#crp', b).onclick = ev => { const t = ev.target.closest('[data-rp]'); if (!t) return; reps = new Set(t.dataset.rp.split('').filter(Boolean).map(Number)); syncR(); };
     $('#csv', b).onclick = () => {
       const title = $('#ct', b).value.trim(), date = $('#cd', b).value; if (!title) return toast('כתבו מה האירוע'); if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return toast('בחרו תאריך');
-      const me = meSlot(); const ev2 = {id: id || uid(), title, date, time: $('#cs', b).value || '', end: $('#ce', b).value || '', who, note: $('#cn', b).value.trim(), ts: Date.now(), ed: me, by: id ? e.by : me, del: false};
+      const me = meSlot(); const ev2 = {id: id || uid(), title, date, time: $('#cs', b).value || '', end: $('#ce', b).value || '', who, note: $('#cn', b).value.trim(), ts: Date.now(), ed: me, by: id ? e.by : me, del: false, rep: [...reps].sort(), until: reps.size ? ($('#cu', b).value || '') : '', skip: id ? (e.skip || []) : []};
+      if (ev2.until && ev2.until < ev2.date) return toast('תאריך הסיום לפני תאריך ההתחלה');
       calAll()[ev2.id] = ev2; save(); ansSync(); relayPost('cal', ev2, `📅 ${nm(me)} ${gw(me, id ? 'עדכן' : 'הוסיף', id ? 'עדכנה' : 'הוסיפה')} ללוז: ${title}`); closeSheet(); sfx('ok'); CALV.sel = date; const dd = new Date(date + 'T12:00'), n0 = new Date(); CALV.mo = (dd.getFullYear() - n0.getFullYear()) * 12 + dd.getMonth() - n0.getMonth(); render(); toast(id ? 'האירוע עודכן' : 'נוסף ללוז המשותף');
     };
-    if (id) $('#cdel', b).onclick = () => { closeSheet(); confirmSheet('למחוק את האירוע?', 'הוא יימחק גם אצל ' + esc(nm(1 - meSlot())) + '.', 'מחיקה', () => { const me = meSlot(); const ev2 = {...e, del: true, ts: Date.now(), ed: me}; calAll()[id] = ev2; save(); ansSync(); relayPost('cal', ev2); render(); }); };
+    if (id && isRep(e) && occ) $('#cdel', b).onclick = () => { closeSheet(); sheet(`<h3>למחוק אירוע חוזר</h3><p class="mut sm">${esc(e.title)} · ${repLbl(e)}</p><div class="col mt"><button class="btn soft wide" id="d1">רק ביום הזה (${new Date(occ + 'T12:00').toLocaleDateString('he-IL', {day: 'numeric', month: 'numeric'})})</button><button class="btn wide" id="da" style="background:#c2185b">את כל החזרות</button><button class="btn ghost wide" data-close>ביטול</button></div>`, sb => {
+      const me = meSlot(); const done = ev2 => { calAll()[id] = ev2; save(); ansSync(); relayPost('cal', ev2); closeSheet(); render(); toast('נמחק'); };
+      $('#d1', sb).onclick = () => done({...e, skip: [...(e.skip || []), occ].slice(-120), ts: Date.now(), ed: me});
+      $('#da', sb).onclick = () => done({...e, del: true, ts: Date.now(), ed: me}); }); };
+    else if (id) $('#cdel', b).onclick = () => { closeSheet(); confirmSheet('למחוק את האירוע?', 'הוא יימחק גם אצל ' + esc(nm(1 - meSlot())) + '.', 'מחיקה', () => { const me = meSlot(); const ev2 = {...e, del: true, ts: Date.now(), ed: me}; calAll()[id] = ev2; save(); ansSync(); relayPost('cal', ev2); render(); }); };
   };
   const b = sheet('', draw); draw(b);
 }
