@@ -1,0 +1,7 @@
+{
+  "appId": "app.betweenus.game",
+  "appName": "Between Us",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "server": { "androidScheme": "https" }
+}

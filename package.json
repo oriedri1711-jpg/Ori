@@ -1,0 +1,16 @@
+{
+  "name": "between-us",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Between Us – couples game, standalone app with phone-to-phone play",
+  "scripts": { "build": "python3 build.py ./node_modules" },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@fontsource/fredoka": "^5.1.0",
+    "@fontsource/rubik": "^5.1.0",
+    "peerjs": "^1.5.4",
+    "qrcodejs": "^1.0.0"
+  }
+}
