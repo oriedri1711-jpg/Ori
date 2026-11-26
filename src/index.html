@@ -178,6 +178,8 @@ label.f{display:block;font-size:14px;color:var(--mut);margin:14px 0 6px}
 .consent{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .consent button{min-height:58px;border-radius:18px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-weight:600}
 .consent button.on{background:#fff;color:#7a0f2e}
+.fabt{position:fixed;z-index:35;left:max(14px,calc(50% - 226px));bottom:calc(86px + var(--safe-b));min-width:52px;height:52px;padding:0 14px;border-radius:99px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--sur2);color:var(--ink);border:1px solid var(--line);box-shadow:0 10px 26px rgba(0,0,0,.45);font-weight:600;font-variant-numeric:tabular-nums}
+.fabt svg{width:24px;height:24px}.fabt.on{background:linear-gradient(135deg,var(--rose),var(--wine));color:#fff;border:0}.fabt.lift{bottom:calc(84px + var(--safe-b))}.fabt span{direction:ltr}#app .scr{padding-bottom:calc(160px + var(--safe-b))}
 .stop{position:fixed;z-index:40;left:18px;bottom:calc(18px + var(--safe-b));min-height:48px;padding:0 18px;border-radius:99px;background:#fff;color:#7a0f2e;font-weight:700;box-shadow:0 10px 26px rgba(0,0,0,.4);display:flex;align-items:center;gap:6px}
 .lockscr{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
 .pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
@@ -271,6 +273,7 @@ table.inf td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align
 <script src="gen.js"></script>
 <script src="love.js"></script>
 <script src="pay.js"></script>
+<script src="timer.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
